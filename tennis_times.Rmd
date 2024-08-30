@@ -1,5 +1,5 @@
 ---
-title: "Nadal vs. Federer: Who Plays Faster?"
+title: "Nadal vs. Federer: Pace of Play"
 author: "Kevin Havis"
 date: "2024-08-29"
 output: pdf_document
@@ -9,32 +9,32 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Nadal vs. Federer: Who Plays Faster?
+# Nadal vs. Federer: Pace of Play
 
 ## Introduction
 
-Who sets the pace when there's no clock? In tennis, it's the players who control the pace of the game. With no time limit on matches, only score, players must be tactical when considering their pace of play.
+Who sets the pace when there's no clock? In tennis, it's the players who control the pace of the game, especially during their service games. With no time limit on matches, only score, players must be tactical when considering their pace of play.
 
-The article focuses on how the pace of play has changed over the years and on different surfaces, but let's look at something a bit different.
+This analysis will use data from a [538 article](https://fivethirtyeight.com/features/why-some-tennis-matches-take-forever/) that focuses mostly on how the game has slowed over time, but today we'll be looking at the player data specifically.
 
-Let's compare the point duration for a classic rival pair; Rafael Nadal and Roger Federer.
-
-[Article Link](https://fivethirtyeight.com/features/why-some-tennis-matches-take-forever/)
+Let's compare the the time between serves and the following point (the "down time") for a classic rival pair; Rafael Nadal and Roger Federer.
 
 ## Setting up the environment
 
-```{r echo=FALSE}
-install.packages("tidyverse")
+First we'll install and load the necessary packages. `tidyverse` conveniently has all of them.
+
+```{r results='hide'}
+install.packages("tidyverse", "knitr")
 ```
 
-```{r echo=FALSE}
+```{r results='hide', message=FALSE}
 library(dplyr)
 library(ggplot2)
 ```
 
-## Loading the Data
+## Loading the data
 
-We'll load the `serve_times.csv` file from the Github repo, which contains data on how many second elapse between points for a given player's serve.
+We'll load the `serve_times.csv` file from the Github repo, which contains data on how many second elapse between a given player's serve and the start of the next point.
 
 ```{r}
 # Load data from Github repo
@@ -46,33 +46,22 @@ glimpse(serve_time)
 
 ## Sub-sectioning the data
 
-Let's subset the data to get the player's we're interested in; Nadal and Federer. We'll look at points both in and out of serve by creating a new feature `player` which will simply represent either of our players of interest involved in the point.
+Let's subset the data to get the player's we're interested in, Nadal and Federer, by filtering for their service games.
 
 ```{r}
-# Create list of player's we'ere interested in
+# Create list of players we're interested in
 players_of_interest <- c('Rafael Nadal', 'Roger Federer')
 
-# Create a "player" column and fill when either player was in the point
-poi_point_time <- serve_time |> 
-  mutate(player = ifelse(
-          server == players_of_interest[1] | opponent == players_of_interest[1], 
-          players_of_interest[1], 
-            ifelse(
-              server == players_of_interest[2] | opponent == players_of_interest[2], 
-              players_of_interest[2], 
-              NA
-              )
-            )
-        ) |> 
-          select(player, seconds_before_next_point) |> # We only neeed these columns now
-          filter(player %in% players_of_interest)      # Filter for our players
+poi_serve_times <- serve_time |> 
+  filter(server %in% players_of_interest) |> 
+  select(server, seconds_before_next_point) # Our variables of interest
 
 # Take a quick look to confirm results are as expected
-glimpse(poi_point_time)
+glimpse(poi_serve_times)
 
 ```
 
-## Visualize Point Time
+## Visualize predictor vs independent variables
 
 In this exercise, we consider `player` to be our predictor variable, and `seconds_before_next_point` to be the independent variable.
 
@@ -80,20 +69,21 @@ Let's visualize the distribution of the data for each player to see if there's a
 
 ```{r}
 
-ggplot(poi_point_time, aes(x = player, y = seconds_before_next_point)) +
+ggplot(poi_serve_times, aes(x = server, y = seconds_before_next_point, color = server)) +
   geom_boxplot() +
   labs(x = "Player",
        y = "Seconds Before Next Point",
-       title = "Distribution of Time Between Points, Nadal v. Federer")
+       title = "Distribution of Time Between Points, Nadal v. Federer") +
+  theme(legend.position = 'none')
 
 ```
 
-We can see that for this sample, Nadal's time between is significantly longer than Federer's, with a median `seconds_before_next_point` of approximately 23 compared to Federer's 16.
+We can see that for this sample, Nadal's time between points is significantly longer than Federer's, with a median `seconds_before_next_point` of approximately 28 compared to Federer's 16.
 
 ## Conclusion
 
-According to the data available, Federer generally plays faster points than Nadal.
+According to the data available, Federer generally plays faster games than Nadal.
 
-For tennis fans, this makes intuitive sense given Federer's aggressive, fluid, and forward-moving play style. Nadal is known for playing topspin power shots and rallying from the baseline, so a longer point should be no surprise!
+For tennis fans, this may make intuitive sense given Federer's fluid and forward-moving play style. Nadal is known for playing topspin power shots and aggressive rallying from the baseline, so perhaps a longer time between serves is part of his strategy!
 
 Admittedly, the sample size is small and limited to a few events. Additional data across a wider set of tournaments, surfaces, and players would make this a far more reasonable analysis and conclusion.
