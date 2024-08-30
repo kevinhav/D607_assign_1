@@ -1,8 +1,11 @@
 ---
-title: "Nadal vs. Federer: Pace of Play"
+title: 'Nadal vs. Federer: Pace of Play'
 author: "Kevin Havis"
 date: "2024-08-29"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -24,7 +27,7 @@ Let's compare the the time between serves and the following point (the "down tim
 First we'll install and load the necessary packages. `tidyverse` conveniently has all of them.
 
 ```{r results='hide'}
-install.packages("tidyverse", "knitr")
+install.packages("tidyverse")
 ```
 
 ```{r results='hide', message=FALSE}
