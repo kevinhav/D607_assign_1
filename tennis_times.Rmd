@@ -3,9 +3,9 @@ title: 'Nadal vs. Federer: Pace of Play'
 author: "Kevin Havis"
 date: "2024-08-29"
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
